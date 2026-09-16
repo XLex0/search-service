@@ -414,6 +414,8 @@ class LLMSearchViewSetTests(APITestCase):
             response = LLMSearchViewSet.as_view({"post": "semantic_search"})(request)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["total"], 1)
+        self.assertIn("qa_context_hint", response.data)
+        self.assertEqual(len(response.data["qa_context_hint"]["documents"]), 1)
 
     def test_semantic_search_handles_errors(self):
         with patch.object(LLMSearchViewSet, "llm_search_service") as mock_service:
@@ -423,6 +425,150 @@ class LLMSearchViewSetTests(APITestCase):
             )
             response = LLMSearchViewSet.as_view({"post": "semantic_search"})(request)
         self.assertEqual(response.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def test_generate_qa_requires_query_and_documents(self):
+        request = factory.post("/llm-search/generate-qa/", {}, format="json")
+        response = LLMSearchViewSet.as_view({"post": "generate_qa"})(request)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        request = factory.post(
+            "/llm-search/generate-qa/", {"query": "ai"}, format="json"
+        )
+        response = LLMSearchViewSet.as_view({"post": "generate_qa"})(request)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_generate_qa_returns_pairs(self):
+        from apps.search_engine.application.services.qa_generator_service import (
+            GenerationLatency,
+            QAGenerationResult,
+        )
+
+        fake = QAGenerationResult(
+            query="ai",
+            processed_docs=[],
+            initial_raw_response="",
+            final_raw_response=(
+                "<pregunta>Q1</pregunta><respuesta>A1</respuesta>"
+                "<pregunta>Q2</pregunta><respuesta>A2</respuesta>"
+                "<pregunta>Q3</pregunta><respuesta>A3</respuesta>"
+            ),
+            intentos_utilizados=1,
+            status="success",
+            latency=GenerationLatency(
+                compression_ms=1.0, generation_ms=2.0, total_generator_ms=3.0
+            ),
+            qa_pairs=[
+                {"question": "Q1", "answer": "A1"},
+                {"question": "Q2", "answer": "A2"},
+                {"question": "Q3", "answer": "A3"},
+            ],
+        )
+        with patch.object(LLMSearchViewSet, "qa_pipeline") as mock_pipeline:
+            mock_pipeline.process.return_value = fake
+            request = factory.post(
+                "/llm-search/generate-qa/",
+                {
+                    "query": "ai",
+                    "documents": [
+                        {"scopus_id": "1", "title": "T", "abstract": "abs"},
+                        {"scopus_id": "2", "title": "T2", "abstract": "abs2"},
+                        {"scopus_id": "3", "title": "T3", "abstract": "abs3"},
+                        {"scopus_id": "4", "title": "ignored", "abstract": "x"},
+                    ],
+                },
+                format="json",
+            )
+            response = LLMSearchViewSet.as_view({"post": "generate_qa"})(request)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data["qa_pairs"]), 3)
+        self.assertEqual(len(response.data["source_docs"]), 3)
+        mock_pipeline.process.assert_called_once()
+        docs_arg = mock_pipeline.process.call_args.kwargs["retrieved_docs"]
+        self.assertEqual(len(docs_arg), 3)
+
+    def test_generate_qa_rejects_when_no_valid_pairs(self):
+        from apps.search_engine.application.services.qa_generator_service import (
+            GenerationLatency,
+            QAGenerationResult,
+        )
+
+        fake = QAGenerationResult(
+            query="ai",
+            processed_docs=[],
+            initial_raw_response="",
+            final_raw_response="texto invalido",
+            intentos_utilizados=3,
+            status="error: no se pudo extraer ningún par pregunta/respuesta válido",
+            latency=GenerationLatency(
+                compression_ms=1.0, generation_ms=2.0, total_generator_ms=3.0
+            ),
+            qa_pairs=[],
+        )
+        with patch.object(LLMSearchViewSet, "qa_pipeline") as mock_pipeline:
+            mock_pipeline.process.return_value = fake
+            request = factory.post(
+                "/llm-search/generate-qa/",
+                {
+                    "query": "ai",
+                    "documents": [{"scopus_id": "1", "title": "T", "abstract": "a"}],
+                },
+                format="json",
+            )
+            response = LLMSearchViewSet.as_view({"post": "generate_qa"})(request)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertTrue(response.data["status"].startswith("error:"))
+        self.assertIn("error", response.data)
+        self.assertEqual(response.data["qa_pairs"], [])
+
+    def test_generate_qa_returns_partial_pairs(self):
+        from apps.search_engine.application.services.qa_generator_service import (
+            GenerationLatency,
+            QAGenerationResult,
+        )
+
+        fake = QAGenerationResult(
+            query="ai",
+            processed_docs=[],
+            initial_raw_response="",
+            final_raw_response="<pregunta>Q1</pregunta><respuesta>A1</respuesta>",
+            intentos_utilizados=3,
+            status="partial: se guardaron 1 de 3 pares válidos",
+            latency=GenerationLatency(
+                compression_ms=1.0, generation_ms=2.0, total_generator_ms=3.0
+            ),
+            qa_pairs=[{"question": "Q1", "answer": "A1"}],
+        )
+        with patch.object(LLMSearchViewSet, "qa_pipeline") as mock_pipeline:
+            mock_pipeline.process.return_value = fake
+            request = factory.post(
+                "/llm-search/generate-qa/",
+                {
+                    "query": "ai",
+                    "documents": [{"scopus_id": "1", "title": "T", "abstract": "a"}],
+                },
+                format="json",
+            )
+            response = LLMSearchViewSet.as_view({"post": "generate_qa"})(request)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertTrue(response.data["status"].startswith("partial:"))
+        self.assertEqual(len(response.data["qa_pairs"]), 1)
+        self.assertEqual(response.data["qa_pairs"][0]["question"], "Q1")
+
+    def test_generate_qa_soft_fails_without_500(self):
+        with patch.object(LLMSearchViewSet, "qa_pipeline") as mock_pipeline:
+            mock_pipeline.process.side_effect = RuntimeError("ollama down")
+            request = factory.post(
+                "/llm-search/generate-qa/",
+                {
+                    "query": "ai",
+                    "documents": [{"scopus_id": "1", "title": "T", "abstract": "a"}],
+                },
+                format="json",
+            )
+            response = LLMSearchViewSet.as_view({"post": "generate_qa"})(request)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertTrue(response.data["status"].startswith("error:"))
+        self.assertEqual(response.data["qa_pairs"], [])
 
     def test_llm_search_service_lazily_instantiated(self):
         LLMSearchViewSet._llm_search_service = None

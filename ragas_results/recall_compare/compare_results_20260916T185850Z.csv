@@ -1,0 +1,31 @@
+query_id,query_original,n_expected,hyde_recall,tfidf_recall,delta_recall,winner,hyde_hits,tfidf_hits,hyde_latency_ms,tfidf_latency_ms,hyde_retrieved,tfidf_retrieved,expected_doc_ids
+q0,retrieval augmented generation,3,0.0,0.3333,-0.3333,tfidf,0,1,3070.77,3.86,doc_global_30|doc_global_21|doc_global_29,doc_global_3|doc_global_38|doc_global_8,doc_global_1|doc_global_2|doc_global_3
+q1,dense passage retrieval,3,1.0,1.0,0.0,tie,3,3,1492.52,1.85,doc_global_6|doc_global_5|doc_global_4,doc_global_6|doc_global_4|doc_global_5,doc_global_4|doc_global_5|doc_global_6
+q2,hybrid search in information retrieval,3,0.3333,1.0,-0.6667,tfidf,1,3,2135.03,3.38,doc_global_15|doc_global_9|doc_global_14,doc_global_7|doc_global_8|doc_global_9,doc_global_7|doc_global_8|doc_global_9
+q3,vector database indexing algorithms,3,1.0,1.0,0.0,tie,3,3,2351.32,2.14,doc_global_10|doc_global_11|doc_global_12,doc_global_10|doc_global_11|doc_global_12,doc_global_10|doc_global_11|doc_global_12
+q4,bm25 text retrieval optimization,3,0.6667,0.6667,0.0,tie,2,2,1799.06,3.57,doc_global_15|doc_global_9|doc_global_14,doc_global_13|doc_global_15|doc_global_179,doc_global_13|doc_global_14|doc_global_15
+q5,query expansion techniques in search engines,3,0.6667,1.0,-0.3333,tfidf,2,3,1102.8,3.5,doc_global_16|doc_global_18|doc_global_10,doc_global_16|doc_global_18|doc_global_17,doc_global_16|doc_global_17|doc_global_18
+q6,hypothetical document embeddings hyde,3,0.6667,1.0,-0.3333,tfidf,2,3,1811.94,1.98,doc_global_19|doc_global_21|doc_global_208,doc_global_20|doc_global_19|doc_global_21,doc_global_19|doc_global_20|doc_global_21
+q7,reranking models for information retrieval,3,0.3333,0.3333,0.0,tie,1,1,2231.37,3.43,doc_global_15|doc_global_22|doc_global_16,doc_global_22|doc_global_20|doc_global_9,doc_global_22|doc_global_23|doc_global_24
+q8,cross-encoder for semantic search,3,0.3333,0.6667,-0.3333,tfidf,1,2,2087.05,3.38,doc_global_27|doc_global_15|doc_global_18,doc_global_27|doc_global_25|doc_global_17,doc_global_25|doc_global_26|doc_global_27
+q9,evaluation metrics for RAG systems,1,1.0,1.0,0.0,tie,1,1,2973.22,3.38,doc_global_28|doc_global_3|doc_global_24,doc_global_28|doc_global_38|doc_global_3,doc_global_28
+q10,knowledge graph enhanced retrieval,3,0.6667,1.0,-0.3333,tfidf,2,3,2478.29,1.81,doc_global_30|doc_global_29|doc_global_16,doc_global_31|doc_global_30|doc_global_29,doc_global_29|doc_global_30|doc_global_31
+q11,multi-vector retrieval models,3,1.0,1.0,0.0,tie,3,3,1661.48,1.83,doc_global_33|doc_global_34|doc_global_32,doc_global_33|doc_global_34|doc_global_32,doc_global_32|doc_global_33|doc_global_34
+q12,sparse and dense embeddings fusion,1,0.0,1.0,-1.0,tfidf,0,1,2770.22,3.64,doc_global_15|doc_global_4|doc_global_6,doc_global_35|doc_global_25|doc_global_4,doc_global_35
+q13,document parsing techniques for rag,3,0.6667,1.0,-0.3333,tfidf,2,3,2913.98,1.86,doc_global_58|doc_global_37|doc_global_36,doc_global_36|doc_global_38|doc_global_37,doc_global_36|doc_global_37|doc_global_38
+q14,semantic caching in language models,3,0.3333,1.0,-0.6667,tfidf,1,3,2864.52,2.71,doc_global_41|doc_global_30|doc_global_54,doc_global_40|doc_global_39|doc_global_41,doc_global_39|doc_global_40|doc_global_41
+q15,small language models efficiency,3,0.6667,0.6667,0.0,tie,2,2,2589.49,1.98,doc_global_42|doc_global_44|doc_global_177,doc_global_44|doc_global_76|doc_global_43,doc_global_42|doc_global_43|doc_global_44
+q16,prompt engineering strategies,3,0.6667,1.0,-0.3333,tfidf,2,3,2989.42,1.91,doc_global_45|doc_global_46|doc_global_105,doc_global_47|doc_global_45|doc_global_46,doc_global_45|doc_global_46|doc_global_47
+q17,parameter efficient fine tuning peft,3,1.0,1.0,0.0,tie,3,3,1615.71,2.44,doc_global_49|doc_global_48|doc_global_50,doc_global_50|doc_global_49|doc_global_48,doc_global_48|doc_global_49|doc_global_50
+q18,quantization of large language models,3,0.6667,0.6667,0.0,tie,2,2,2505.33,1.87,doc_global_51|doc_global_53|doc_global_189,doc_global_52|doc_global_51|doc_global_40,doc_global_51|doc_global_52|doc_global_53
+q19,hallucination detection in llms,3,1.0,1.0,0.0,tie,3,3,2902.88,3.96,doc_global_55|doc_global_54|doc_global_56,doc_global_55|doc_global_56|doc_global_54,doc_global_54|doc_global_55|doc_global_56
+q20,question generation using neural networks,2,0.5,1.0,-0.5,tfidf,1,2,1919.89,1.95,doc_global_58|doc_global_198|doc_global_94,doc_global_57|doc_global_58|doc_global_239,doc_global_57|doc_global_58
+q21,question answering evaluation benchmarks,3,0.3333,0.3333,0.0,tie,1,1,1727.09,3.03,doc_global_28|doc_global_4|doc_global_59,doc_global_61|doc_global_4|doc_global_39,doc_global_59|doc_global_60|doc_global_61
+q22,synthetic dataset generation llm,3,0.6667,1.0,-0.3333,tfidf,2,3,3428.74,3.52,doc_global_62|doc_global_64|doc_global_159,doc_global_63|doc_global_62|doc_global_64,doc_global_62|doc_global_63|doc_global_64
+q23,llm reasoning and chain of thought,3,0.0,1.0,-1.0,tfidf,0,3,1052.73,3.89,doc_global_23|doc_global_413|doc_global_135,doc_global_67|doc_global_66|doc_global_65,doc_global_65|doc_global_66|doc_global_67
+q24,context length extrapolation in transformers,3,0.6667,1.0,-0.3333,tfidf,2,3,2306.01,2.03,doc_global_68|doc_global_70|doc_global_49,doc_global_69|doc_global_68|doc_global_70,doc_global_68|doc_global_69|doc_global_70
+q25,llm as a judge evaluation methodology,3,1.0,0.6667,0.3333,hyde_bm25,3,2,1990.24,2.04,doc_global_72|doc_global_71|doc_global_73,doc_global_73|doc_global_72|doc_global_67,doc_global_71|doc_global_72|doc_global_73
+q26,instruction tuning small language models,3,0.3333,1.0,-0.6667,tfidf,1,3,1227.6,2.71,doc_global_75|doc_global_1|doc_global_44,doc_global_75|doc_global_74|doc_global_76,doc_global_74|doc_global_75|doc_global_76
+q27,agentic workflows and multi-agent systems,3,0.6667,1.0,-0.3333,tfidf,2,3,1642.92,1.89,doc_global_79|doc_global_353|doc_global_78,doc_global_79|doc_global_77|doc_global_78,doc_global_77|doc_global_78|doc_global_79
+q28,multilingual large language models,3,1.0,1.0,0.0,tie,3,3,1185.2,2.09,doc_global_81|doc_global_80|doc_global_82,doc_global_80|doc_global_81|doc_global_82,doc_global_80|doc_global_81|doc_global_82
+q29,prompt injection vulnerability detection,2,1.0,1.0,0.0,tie,2,2,2522.96,2.51,doc_global_83|doc_global_84|doc_global_407,doc_global_84|doc_global_83|doc_global_47,doc_global_83|doc_global_84

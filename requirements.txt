@@ -49,3 +49,6 @@ sentence-transformers==3.3.1
 spacy==3.7.2
 langdetect
 gunicorn
+ollama
+# RAGAS evaluation (scripts/ragas.py) — install in .venv-ragas if preferred
+google-genai>=1.0.0

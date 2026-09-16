@@ -6,6 +6,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 import langdetect
 import numpy as np
+import ollama
 import pandas as pd
 import spacy
 import torch
@@ -18,6 +19,17 @@ from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
 
 logger = logging.getLogger(__name__)
+
+DEFAULT_OLLAMA_HOST = "http://127.0.0.1:11434"
+DEFAULT_HYDE_MODEL = "qwen2.5:1.5b"
+
+
+def _ollama_client() -> ollama.Client:
+    return ollama.Client(host=os.environ.get("OLLAMA_HOST", DEFAULT_OLLAMA_HOST))
+
+
+def _hyde_model_name() -> str:
+    return os.environ.get("OLLAMA_HYDE_MODEL", os.environ.get("OLLAMA_QA_MODEL", DEFAULT_HYDE_MODEL))
 
 
 class QueryProcessor:
@@ -182,6 +194,85 @@ class BM25Retriever:
         return results
 
 
+class HydeBM25Retriever:
+    """HyDE + BM25 retriever ported from end_to_end.py (no evaluation)."""
+
+    def __init__(self, df: pd.DataFrame, llm_model: str | None = None):
+        self.df = df
+        self.llm_model = llm_model or _hyde_model_name()
+        self._client = _ollama_client()
+        self.bm25 = None
+
+    def _ensure_bm25_index(self):
+        if self.bm25 is not None:
+            return
+        corpus_texts = [
+            f"{row.get('title', '')} {row.get('abstract', row.get('content', ''))}".lower()
+            for _, row in self.df.iterrows()
+        ]
+        tokenized_corpus = [doc.split() for doc in corpus_texts]
+        self.bm25 = BM25Okapi(tokenized_corpus)
+
+    def _generate_hypothetical_document(self, raw_query: str) -> str:
+        prompt = (
+            f"Act as a scientific researcher. Write a 3-sentence abstract of a fictional "
+            f"academic paper that answers the following query: '{raw_query}'. "
+            f"Use rigorous academic tone, go straight to the text with no introductions, "
+            f"and ALWAYS write in English."
+        )
+        try:
+            res = self._client.chat(
+                model=self.llm_model,
+                messages=[{"role": "user", "content": prompt}],
+                options={"temperature": 0.7, "num_predict": 150},
+            )
+            return res["message"]["content"].strip()
+        except Exception as e:
+            logger.warning(f"HyDE generation failed: {e}")
+            return ""
+
+    def expand_query(self, query: str) -> str:
+        """Build HyDE-augmented query: original + hypothetical abstract."""
+        hypothetical_doc = self._generate_hypothetical_document(query)
+        if hypothetical_doc:
+            return f"{query}\n{hypothetical_doc}"
+        return query
+
+    def retrieve(self, query: str, top_k: int = 5) -> dict:
+        self._ensure_bm25_index()
+        t0 = time.time()
+        hyde_query = self.expand_query(query)
+        t_hyde = (time.time() - t0) * 1000
+
+        t1 = time.time()
+        tokenized_query = hyde_query.lower().split()
+        scores = self.bm25.get_scores(tokenized_query)
+        top_indices = np.argsort(scores)[::-1][:top_k]
+        t_search = (time.time() - t1) * 1000
+
+        docs = []
+        for idx in top_indices:
+            row = self.df.iloc[idx]
+            docs.append(
+                {
+                    "id": int(idx),
+                    "doc_id": str(row.get("article_id", idx)),
+                    "score": float(scores[idx]),
+                    "title": row.get("title", ""),
+                    "abstract": row.get("abstract", ""),
+                    "content": row.get("content", ""),
+                    "text": row.get("abstract", row.get("content", "")),
+                }
+            )
+
+        return {
+            "hyde_query": hyde_query,
+            "docs": docs,
+            "t_hyde_ms": t_hyde,
+            "t_search_ms": t_search,
+        }
+
+
 class DenseRetriever:
     def __init__(
         self,
@@ -333,8 +424,13 @@ class LLMSearchService:
             logger.error(f"Error retrieving corpus from Neo4j: {e}")
             raise
 
-    def search(self, query: str, top_k: int = 20) -> list[dict]:
-        """Perform semantic search using combination of BM25 and Dense Retrieval"""
+    def search(self, query: str, top_k: int = 20, use_hyde: bool = False) -> list[dict]:
+        """Perform semantic search using BM25 + Dense Retrieval.
+
+        When ``use_hyde`` is True, expands the query with a HyDE hypothetical
+        abstract (Ollama) before the existing BM25 → Dense pipeline.
+        When False, keeps the current behavior unchanged.
+        """
         try:
             # Process query
             enhanced_query, translation_time, keybert_time, keywords = (
@@ -343,6 +439,12 @@ class LLMSearchService:
 
             # Use the cached DataFrame that matches embeddings size
             df = self.df
+
+            retrieval_query = enhanced_query
+            if use_hyde:
+                hyde_retriever = HydeBM25Retriever(df)
+                retrieval_query = hyde_retriever.expand_query(enhanced_query)
+                logger.info("HyDE enabled; using expanded query for retrieval")
 
             # Initialize retrievers
             bm25_retriever = BM25Retriever(df)
@@ -353,13 +455,13 @@ class LLMSearchService:
             # Perform retrievals concurrently
             with ThreadPoolExecutor() as executor:
                 bm25_future = executor.submit(
-                    bm25_retriever.retrieve, enhanced_query, top_k=500
+                    bm25_retriever.retrieve, retrieval_query, top_k=500
                 )
                 bm25_results = bm25_future.result()
 
                 dense_future = executor.submit(
                     dense_retriever.retrieve,
-                    query=enhanced_query,
+                    query=retrieval_query,
                     candidates=bm25_results,
                     top_k=top_k,
                 )

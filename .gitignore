@@ -24,6 +24,15 @@ centinela_logs/*.log*
 
 # Entorno virtual
 venv/
+.venv-ragas/
+
+# Resultados de evaluación: se versionan summary.md y csv; json detallados quedan locales
+ragas_results/**/*.json
+!ragas_results/**/.gitkeep
+!ragas_results/.gitkeep
+!ragas_results/recall/.gitkeep
+!ragas_results/recall_compare/.gitkeep
+!ragas_results/latency/.gitkeep
 
 # Caché de modelos y variables de entorno locales
 hf_cache/

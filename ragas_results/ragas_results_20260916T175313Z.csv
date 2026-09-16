@@ -1,0 +1,44 @@
+sample_id,query_original,question,answer,retrieved_doc_ids,expected_doc_ids,recall_at_k,faithfulness,answer_relevancy,context_relevancy,status,error,latency_ms
+0:0,retrieval augmented generation,¿Qué limitaciones inherentes a los Large Language Models (LLMs) busca solucionar Retrieval-Augmented Generation (RAG) y cómo se combinan sus memorias paramétricas y no paramétricas?,"Retrieval-Augmented Generation (RAG) busca resolver las limitaciones inherentes a los Large Language Models (LLMs) en dos aspectos clave:
+
+1. **Acceso a la información**: RAG combina memorias paramétricas y no paramétricas para mejorar la precisión y la precisión de la información accesible. La paramétrica se basa en pre-entrenados de modelos de secuencia, mientras que la no paramétrica se obtiene de una base de datos Wikipedia indexada con un retriever neural preentrenado.
+
+2. **Memoria paramétrica**: Esta se compone de un modelo de secuencia pre-entrenado y se utiliza para generar respuestas basadas en la información accesible.
+
+3. **Memoria no paramétrica**: Esta se compone de una base de datos Wikipedia indexada con un retriever neural pre-entrenado, y se utiliza para proporcionar una base de datos de información más amplia y dinámica.
+
+RAG permite a los modelos LLMs generar respuestas más precisas y específicas, especialmente en tareas de alto contenido de conocimiento, y permite la actualización continua de la información y la integración de información específica del dominio.",doc_global_1|doc_global_30|doc_global_2,doc_global_1|doc_global_2|doc_global_3,0.6667,0.5333,0.8257,0.1,ok,,104655.62
+0:1,retrieval augmented generation,"¿Cuáles son las dos formulaciones de RAG a nivel de secuencia y token, y cómo se estructuran las fases del framework RAG dentro de su evolución de paradigmas?","Las dos formulaciones de RAG a nivel de secuencia y token son:
+
+1. **Naive RAG**: Esta es la primera versión de RAG, que se basa en la simple idea de combinar el conocimiento de una base de datos externa con el modelo de generación de LLMs. En este caso, la generación de la respuesta se realiza directamente utilizando la información extraída de la base de datos, sin considerar la estructura del texto original.
+
+2. **Advanced RAG**: Esta formulación es más sofisticada y se basa en la idea de utilizar un modelo de generación de LLMs para generar una representación del texto original, y luego utilizar esta representación para filtrar y seleccionar la información más relevante de la base de datos. En este caso, la generación de la respuesta se realiza primero, y luego se utiliza la información extraída de la base de datos para completar la respuesta.
+
+Las fases del framework RAG dentro de su evolución de paradigmas son:
+
+1. **Retrieval**: Esta fase se encarga de la extracción de información relevante de la base de datos externa. Se utiliza un modelo de generación de LLMs para generar una representación del texto original, y luego se utiliza esta representación para filtrar y seleccionar la información más relevante de la base de datos.
+
+2. **Generation**: Esta fase se encarga de la generación de la respuesta final. Se utiliza el modelo de generación de LLMs para generar una respuesta basada en la información extraída de la base de datos.
+
+3. **Augmentation**: Esta fase se encarga de la integración",doc_global_2|doc_global_30|doc_global_24,doc_global_1|doc_global_2|doc_global_3,0.3333,0.0,0.8339,0.0645,ok,,87643.87
+0:2,retrieval augmented generation,¿Qué dimensiones clave requiere evaluar un sistema RAG y cómo resuelve RAGAs la necesidad de anotaciones humanas?,"RAGAs requiere evaluar las siguientes dimensiones clave:
+
+1. **Identificación de contextos relevantes y focados**: La capacidad del sistema de recuperación de información para detectar pasajes de contexto relevantes y focados.
+2. **Explores de pasajes de contexto**: La capacidad del LLM para explotar de manera fiel los pasajes de contexto identificados.
+3. **Calidad de la generación**: La calidad del resultado generado por el LLM.
+
+RAGAs resuelve la necesidad de anotaciones humanas de la siguiente manera:
+
+1. **Evaluación sin anotaciones humanas**: RAGAs introduce una serie de métricas que pueden evaluar estas dimensiones sin depender de anotaciones humanas de referencia.
+2. **Evaluación rápida y eficiente**: La introducción de un marco de evaluación que puede contribuir de manera crucial a acelerar los ciclos de evaluación de las arquitecturas RAG, especialmente dado el rápido adopción de LLMs.
+3. **Evaluación de RAGs en múltiples paradigmas**: La evaluación de InfoGain-RAG en modelos y benchmarks de varios tipos, demostrando un incremento significativo en la precisión del match exacto en varios casos, incluyendo la mejora de 17.9% en NaturalQA en comparación con RAGs basados en la reflexión y modernos métodos basados en la ranking.",doc_global_3|doc_global_24|doc_global_2,doc_global_1|doc_global_2|doc_global_3,0.6667,0.6154,0.8543,0.069,ok,,66860.5
+1:0,dense passage retrieval,¿Cómo se compara la efectividad del modelo de representación densa propuesto en el Doc 1 respecto a los métodos tradicionales de búsqueda dispersa y cuál es la arquitectura base utilizada?,"El modelo de representación densa propuesto en el Doc 1 es superior en términos de efectividad a los métodos tradicionales de búsqueda dispersa y cuantitativamente superior a los métodos cuantitativamente tradicionales de búsqueda dispersa. La arquitectura base utilizada es una combinación de técnicas de aprendizaje automático y optimización basada en parámetros, incluyendo técnicas como la distilación de conocimiento y la optimización basada en parámetros.",doc_global_22|doc_global_15|doc_global_121,doc_global_4|doc_global_5|doc_global_6,0.0,0.3333,0.8946,0.0,ok,,45096.66
+1:1,dense passage retrieval,¿Qué desafíos específicos en el entrenamiento de dual-encoders para dense passage retrieval aborda RocketQA y mediante qué contribuciones técnicas los resuelve?,"RocketQA aborda los desafíos específicos del entrenamiento de dual-encoders para dense passage retrieval mediante tres contribuciones técnicas:
+
+1. **Cross-batch Negatives**: Proporciona una forma efectiva de manejar la discrepancia entre el entrenamiento y la inferencia, reduciendo la probabilidad de error en la clasificación de negativos.
+
+2. **Denoised Hard Negatives**: Implementa una técnica para eliminar los errores en los negativos hard, mejorando significativamente la precisión del entrenamiento.
+
+3. **Data Augmentation**: Proporciona una forma de aumentar la diversidad de los datos de entrenamiento, lo que mejora la generalización del modelo y aumenta la capacidad del mismo para aprender representaciones más precisas.
+
+Estas contribuciones técnicas han demostrado ser efectivas en RocketQA, mejorando significativamente la precisión de la densa recuperación de pasajes y estableciendo nuevos recordes en múltiples módulos de QA.",doc_global_5|doc_global_4|doc_global_6,doc_global_4|doc_global_5|doc_global_6,1.0,0.5333,0.8914,0.0909,ok,,60534.2
